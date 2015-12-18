@@ -1,0 +1,77 @@
+[y,fs] = audioread('01-Sargon-Mindless.mp3');
+y = y(:,1) + y(:,2);
+l1 = length(y);
+l2 = roundn(l1,1);
+x = zeros(l2-l1,1);
+y = cat(1,y,x);
+y = reshape(y,[],10);
+
+C = 0;
+Csharp = 0;
+D = 0;
+Dsharp = 0;
+E = 0;
+F = 0;
+Fsharp = 0;
+G = 0;
+Gsharp = 0;
+A = 0;
+Asharp = 0;
+B = 0;
+
+for k =1:10
+Y(:,k) = fft(y(:,k));
+N = l2/10;
+P2 = abs(Y(:,k)/N); 
+P1 = P2(1:N/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+f = fs*(0:N/2)/N;
+L = length(P1);
+fref = 261.63;
+x1 = round(12*log2(f/fref)); 
+x = mod(x1,12);
+Y1(:,k) = P1;
+
+L = length(P1);
+for i = 1:L
+    if x(i) == 0
+        C = C + abs(P1(i))*abs(P1(i));
+    elseif x(i) == 1
+        Csharp = Csharp + abs(P1(i))*abs(P1(i));
+    elseif x(i) == 2
+        D = D + abs(P1(i))*abs(P1(i));
+    elseif x(i) == 3
+        Dsharp = Dsharp + abs(P1(i))*abs(P1(i));
+    elseif x(i) == 4
+        E = E + abs(P1(i))*abs(P1(i));
+    elseif x(i) == 5
+        F = F + abs(P1(i))*abs(P1(i));
+    elseif x(i) == 6
+        Fsharp = Fsharp + abs(P1(i))*abs(P1(i));
+    elseif x(i) == 7
+        G = G + abs(P1(i))*abs(P1(i));
+    elseif x(i) == 8
+        Gsharp = Gsharp + abs(P1(i))*abs(P1(i));
+    elseif x(i) == 9
+        A = A + abs(P1(i))*abs(P1(i));
+    elseif x(i) == 10
+        Asharp = Asharp + abs(P1(i))*abs(P1(i));
+    elseif x(i) == 11
+        B = B + abs(P1(i))*abs(P1(i));
+    end
+
+Amplitude = [C,Csharp,D,Dsharp,E,F,Fsharp,G,Gsharp,A,Asharp,B];
+chroma(k,:) = Amplitude;
+end
+end
+
+l1 = length(chroma);
+m = abs(max(chroma));
+for k = 1:l1
+    for l = k:l1
+        d(k,l) = abs(chroma(l) - chroma(k));
+        d(l,k) = d(k,l);
+    end
+end
+
+surf(d)
