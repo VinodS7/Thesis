@@ -66,3 +66,6 @@ for k = 1:2048
 end
 
 imagesc(d)
+title('Self-distance Matrix')
+xlabel('Time')
+ylabel('Time')
