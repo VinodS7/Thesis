@@ -1,0 +1,66 @@
+function [d] = sdm(FileName)
+[y,Fs] = audioread(FileName);
+y = y(:,1) + y(:,2);
+L1 = length(y);
+
+%segment the audiofile into 2048 parts with 50% overlap
+
+y = cat(1,y,zeros([2048-mod(L1,2048),1]));  %zero padding audio file to make it a multiple of 2048 using 'cat'
+x = buffer(y,length(y)/1024,length(y)/2048); %Helps segment audio file
+[N,~] = size(x); 
+w = hamming(N);
+
+for k = 1:2048    
+    x(:,k) = w.*x(:,k);
+end
+
+%Calculate FFT of each part
+
+for k = 1:2048
+    Y(:,k) = fft(x(:,k));
+end
+
+%Make the FFT a single sided FFT
+
+P2 = abs(Y/N); 
+P1 = P2(1:N/2+1,:);
+P1(2:end-1) = 2*P1(2:end-1);
+f = Fs*(0:N/2)/N;
+[L2,~] = size(P1);
+
+%Assign a range of frequencies to a pitch class
+
+fref = 261.63;
+x1 = round(12*log2(f/fref)); 
+x = mod(x1,12);
+
+%initialize pitch chroma
+
+pc = zeros([12,2048]);
+
+%Sum the amplitude found at different frequencies which belong to the same
+%pitch class
+
+for k = 1:2048
+    for i = 1:L2
+        for j = 1:12
+            if x(i) == j-1
+            pc(j,k) = pc(j,k) + abs(P1(i,k))*abs(P1(i,k));
+            end
+        end
+    end
+end
+
+%Initialize distance matrix
+
+d = zeros([2048,2048]);
+
+%Calculate sdm using Euclidean distance and assuming symmetry let d(k,l) =
+%d(l,k) to reduce computation
+
+for k = 1:2048
+    for l = k:2048
+        d(k,l) = abs(pc(k) - pc(l));
+        d(l,k) = d(k,l);
+    end
+end
