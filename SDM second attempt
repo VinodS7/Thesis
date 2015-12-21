@@ -64,3 +64,5 @@ for k = 1:2048
         d(l,k) = d(k,l);
     end
 end
+
+imagesc(d)
