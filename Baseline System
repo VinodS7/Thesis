@@ -1,0 +1,22 @@
+%Segment song into blocks of 10s
+[y,Fs] = audioread('01.  Adele - Hello.mp3');
+y = mean(y,2);
+y = resample(y,11500,Fs);
+fs = 11500;
+p = nextpow2(115000);
+y = buffer(y,2^17);
+
+%Drum toolbox gives novelty function
+%Let novelty function be n
+
+[r,lags] = xcorr(n,'coeff');
+[~,I] = max(r);
+for lag = I:length(r)
+    [pks,locs] = findpeaks(r);
+end
+
+%period in samples
+
+period_samples= r(I) - r(min(locs));
+period_time = period_samples/fs;
+
